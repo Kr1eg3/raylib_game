@@ -8,3 +8,4 @@ Makefile.Android
 .vscode/tasks.json
 main.code-workspace
 main.exe
+examples
