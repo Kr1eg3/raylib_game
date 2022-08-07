@@ -1,5 +1,7 @@
 #include <iostream>
 #include "raylib.h"
+#include <vector>
+#include "include/World.h"
 
 class Player
 {
@@ -7,8 +9,6 @@ private:
 public:
     int health_points {100};
     Vector3 position {0.0f, 1.0f, 0.0f};
-
-
 };
 
 Vector3 sub_vec3(Vector3 a, Vector3 b)
@@ -50,9 +50,20 @@ int main()
 
     int framesCounter = 0;
 
-    Model church = LoadModel("church.obj");
-    Texture2D church_texture = LoadTexture("church_diffuse.png");
-    church.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = church_texture;
+    // Create World class instance
+    World *world {nullptr};
+    world = new World; 
+
+    Model church_model = LoadModel("resources/objects/church.obj");
+    Vector3 church_position {10.0f, 0.0f, 5.0f};
+    Texture2D church_texture = LoadTexture("resources/textures/church_diffuse.png");
+    Static_object church {church_model, church_texture, church_position, 1.1f};
+    world->push_static_object(church); 
+
+    //church_model.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = church_texture;
+
+    // Apply textures for all static objects in World
+    world->apply_textures_for_static_objects();
 
     Player player; 
     Camera camera = { 0 };
@@ -66,12 +77,12 @@ int main()
 
     GameScreen currentScreen = LOGO;
     
-    Image imMap = LoadImage("Limon.png");                // Load cubicmap image (RAM)
+    Image imMap = LoadImage("resources/textures/Limon.png");                // Load cubicmap image (RAM)
     Texture2D cubicmap = LoadTextureFromImage(imMap);
 
     Vector3 cubePosition = { 0.0f, 1.0f, 0.0f };  // {x, y ,z}
 
-    RenderTexture2D target = LoadRenderTexture(screenWidth, screenHeight);
+    //RenderTexture2D target = LoadRenderTexture(screenWidth, screenHeight);
 
     SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
     //--------------------------------------------------------------------------------------
@@ -157,18 +168,25 @@ int main()
                 {
                     // TODO: Draw GAMEPLAY screen here!
                     //BeginTextureMode(target);
-                        ClearBackground(RAYWHITE);
+                        ClearBackground(SKYBLUE);
                         BeginMode3D(camera);
+                        //-----------------------------------------------------------------------------
+                            DrawPlane((Vector3){ 0, 0, 0 }, (Vector2){ 100, 100 }, GREEN);
+                            player.position.x = camera.position.x;
+                            player.position.z = camera.position.z;
 
-                        player.position.x = camera.position.x;
-                        player.position.z = camera.position.z;
-
-                        DrawModel(church, {10.0f, 0.0f, 5.0f}, 1.1f, WHITE);
-                        DrawCubeTexture(cubicmap, cubePosition, 2.0f, 2.0f, 2.0f, WHITE);
-                        DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, MAROON);
-                        DrawGrid(1000, 1.0f);
+                            world->draw_static_objects();
+                            //DrawModel(church, {10.0f, 0.0f, 5.0f}, 1.1f, WHITE);
+                            DrawCubeTexture(cubicmap, cubePosition, 2.0f, 2.0f, 2.0f, WHITE);
+                            DrawCubeWires(cubePosition, 2.0f, 2.0f, 2.0f, MAROON);
+                            //DrawGrid(100, 1.0f);
+                        //-----------------------------------------------------------------------------
 
                         EndMode3D();
+                    
+                        DrawText(TextFormat("Player x position: %f", player.position.x), 10, 60, 20, DARKGRAY);  
+                        DrawText(TextFormat("Player z position: %f", player.position.z), 10, 80, 20, DARKGRAY);  
+
                     //EndTextureMode();
 
                 } break;
@@ -183,8 +201,7 @@ int main()
                 default: break;
             }
             
-            DrawText(TextFormat("Player x position: %f", player.position.x), 10, 60, 20, DARKGRAY);  
-            DrawText(TextFormat("Player z position: %f", player.position.z), 10, 80, 20, DARKGRAY);  
+
             DrawFPS(10, 10);
 
         EndDrawing();
