@@ -2,6 +2,7 @@
 #include "raylib.h"
 #include "raymath.h"
 #include <vector>
+#include <string>
 #include "include/World.h"
 
 #define RLIGHTS_IMPLEMENTATION
@@ -65,6 +66,10 @@ int main()
     World *world {nullptr};
     world = new World; 
 
+
+    const char start_message[128] = "This is bla bla bla bla bla bla bla bla bla xDDDDDDDDDDDDDDDDDDD";
+    
+
     // Church object
     //--------------------------------------------------------------------
     Model church_model = LoadModel("resources/objects/church.obj");
@@ -75,7 +80,7 @@ int main()
     //--------------------------------------------------------------------
 
     // Plane and cube from mesh
-    Model model = LoadModelFromMesh(GenMeshPlane(10.0f, 10.0f, 3, 3));
+    Model model = LoadModelFromMesh(GenMeshPlane(100.0f, 100.0f, 3, 3));
     Model cube = LoadModelFromMesh(GenMeshCube(2.0f, 2.0f, 2.0f));
 
 
@@ -96,7 +101,7 @@ int main()
     
     // Load cubicmap image (RAM)
     Image imMap = LoadImage("resources/textures/Limon.png");                
-    Texture2D cubicmap = LoadTextureFromImage(imMap);
+    //Texture2D cubicmap = LoadTextureFromImage(imMap);
 
     // Load basic lighting shader
     Shader shader = LoadShader(TextFormat("resources/shaders/glsl%i/base_lighting.vs", GLSL_VERSION),
@@ -138,8 +143,11 @@ int main()
             {
                 framesCounter++;    // Count frames
 
+                if (IsKeyDown(KEY_SPACE)) framesCounter += 8;
+                
+
                 // Wait for 2 seconds (120 frames) before jumping to TITLE screen
-                if (framesCounter > 120)
+                if (framesCounter > 400)
                 {
                     currentScreen = TITLE;
                 }
@@ -186,6 +194,7 @@ int main()
                 {
                     DrawText("LOGO SCREEN", 20, 20, 40, LIGHTGRAY);
                     DrawText("WAIT for 2 SECONDS...", 290, 220, 20, GRAY);
+                    DrawText(TextSubtext(start_message, 0, framesCounter/10), screenWidth/2, screenHeight/2, 40, MAROON);
 
                 } break;
                 case TITLE:
