@@ -4,19 +4,14 @@
 #include <vector>
 #include <string>
 #include "include/World.h"
+#include "include/Player.h"
 
 #define RLIGHTS_IMPLEMENTATION
 #include "include/rlights.h"
 
 #define GLSL_VERSION 330
 
-class Player
-{
-private:
-public:
-    int health_points {100};
-    Vector3 position {0.0f, 1.0f, 0.0f};
-};
+
 
 Vector3 sub_vec3(Vector3 a, Vector3 b)
 {
@@ -39,10 +34,11 @@ Vector3 scale_vec3(Vector3 a, int b)
     return result; 
 }
 
-typedef enum GameScreen { LOGO = 0, 
-                          TITLE, 
-                          GAMEPLAY, 
-                          ENDING } GameScreen;
+typedef enum { LOGO = 0, 
+               TITLE, 
+               GAMEPLAY, 
+               ENDING 
+} GameScreen;
 
 
 
@@ -100,7 +96,7 @@ int main()
     GameScreen currentScreen = LOGO;
     
     // Load cubicmap image (RAM)
-    Image imMap = LoadImage("resources/textures/Limon.png");                
+    //Image imMap = LoadImage("resources/textures/Limon.png");                
     //Texture2D cubicmap = LoadTextureFromImage(imMap);
 
     // Load basic lighting shader
@@ -207,15 +203,17 @@ int main()
                 case GAMEPLAY:
                 {
                     //BeginTextureMode(target);
+
                         ClearBackground(SKYBLUE);
                         BeginMode3D(camera);
+                        
+                        // Stuff to do in 3d mode
                         //-----------------------------------------------------------------------------
                             DrawModel(model, {0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
                             DrawModel(cube, {0.0f, 1.0f, 0.0f}, 1.0f, WHITE);
                             //DrawPlane((Vector3){ 0, 0, 0 }, (Vector2){ 100, 100 }, GREEN);
-                            player->position.x = camera.position.x;
-                            player->position.z = camera.position.z;
-
+                            player->set_player_posX( camera.position.x );
+                            player->set_player_posZ( camera.position.z );
                             world->draw_static_objects();
                             //DrawModel(church, {10.0f, 0.0f, 5.0f}, 1.1f, WHITE);
                             //DrawCubeTexture(cubicmap, cubePosition, 2.0f, 2.0f, 2.0f, WHITE);
@@ -225,8 +223,8 @@ int main()
 
                         EndMode3D();
                     
-                        DrawText(TextFormat("Player x position: %f", player->position.x), 10, 60, 20, DARKGRAY);  
-                        DrawText(TextFormat("Player z position: %f", player->position.z), 10, 80, 20, DARKGRAY);  
+                        DrawText(TextFormat( "Player x position: %f", player->get_player_posX() ), 10, 60, 20, DARKGRAY);  
+                        DrawText(TextFormat( "Player z position: %f", player->get_player_posZ() ), 10, 80, 20, DARKGRAY);  
 
                     //EndTextureMode();
 
