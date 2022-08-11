@@ -46,25 +46,29 @@ int main()
 {
     // Initialization
     //--------------------------------------------------------------------------------------
+
+    // Screen init
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     const int screenWidth = 1280;
     const int screenHeight = 720;
 
     SetConfigFlags(FLAG_MSAA_4X_HINT);  // Enable Multi Sampling Anti Aliasing 4x (if available)
-    InitWindow(screenWidth, screenHeight, "GggggWpp");
+    InitWindow(screenWidth, screenHeight, "raylib game");
 
-    int framesCounter = 0;
+    GameScreen currentScreen = LOGO;
+    // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    // Create Player class instance
-    Player* player {nullptr};
+    // Class instances init
+    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<    
+    Player* player {nullptr}; // Create Player class instance
     player = new Player;
 
-    // Create World class instance
-    World *world {nullptr};
+    World *world {nullptr};  // Create World class instance
     world = new World; 
+    // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-
-    const char start_message[128] = "This is bla bla bla bla bla bla bla bla bla xDDDDDDDDDDDDDDDDDDD";
-    
+    // Static objects init
+    // ******************************************************************************************
 
     // Church object
     //--------------------------------------------------------------------
@@ -75,52 +79,43 @@ int main()
     world->push_static_object(church); 
     //--------------------------------------------------------------------
 
+    // ******************************************************************************************
+
+    // Start frame counter for logo;
+    int framesCounter = 0;
+
+    const char start_message[128] = "This is bla bla bla bla bla bla bla bla bla xDDDDDDDDDDDDDDDDDDD";
+    
     // Plane and cube from mesh
     Model model = LoadModelFromMesh(GenMeshPlane(100.0f, 100.0f, 3, 3));
     Model cube = LoadModelFromMesh(GenMeshCube(2.0f, 2.0f, 2.0f));
 
-
     // Apply textures for all static objects in World
     world->apply_textures_for_static_objects();
 
-    
-    Camera camera = { 0 };
-    camera.position = (Vector3){ 2.0f, 2.0f, 2.0f };
-    camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
-    camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
-    camera.fovy = 30.0f;
-    camera.projection = CAMERA_PERSPECTIVE;
-
-    SetCameraMode(camera, CAMERA_FIRST_PERSON);
-
-    GameScreen currentScreen = LOGO;
-    
-    // Load cubicmap image (RAM)
-    //Image imMap = LoadImage("resources/textures/Limon.png");                
-    //Texture2D cubicmap = LoadTextureFromImage(imMap);
-
     // Load basic lighting shader
-    Shader shader = LoadShader(TextFormat("resources/shaders/glsl%i/base_lighting.vs", GLSL_VERSION),
+    Shader light_shader = LoadShader(TextFormat("resources/shaders/glsl%i/base_lighting.vs", GLSL_VERSION),
                                TextFormat("resources/shaders/glsl%i/lighting.fs", GLSL_VERSION));
     
-    shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(shader, "viewPos");
+    light_shader.locs[SHADER_LOC_VECTOR_VIEW] = GetShaderLocation(light_shader, "viewPos");
 
     // Ambient light level (some basic lighting)
-    int ambientLoc = GetShaderLocation(shader, "ambient");
+    int ambientLoc = GetShaderLocation(light_shader, "ambient");
     const float val[4]  = {0.1f, 0.1f, 0.1f, 1.0f};
-    //(float[4]){ 0.1f, 0.1f, 0.1f, 1.0f }
-    SetShaderValue(shader, ambientLoc, val, SHADER_UNIFORM_VEC4);
+    SetShaderValue(light_shader, ambientLoc, val, SHADER_UNIFORM_VEC4);
 
     // Assign out lighting shader to model
-    model.materials[0].shader = shader;
-    cube.materials[0].shader = shader;
+    model.materials[0].shader = light_shader;
+    cube.materials[0].shader = light_shader;
+
+    world->get_static_object(0).model.materials[0].shader = light_shader;
 
     // Create lights
     Light lights[MAX_LIGHTS] = { 0 };
-    lights[0] = CreateLight(LIGHT_POINT, (Vector3){ -2, 1, -2 }, Vector3Zero(), YELLOW, shader);
-    lights[1] = CreateLight(LIGHT_POINT, (Vector3){ 2, 1, 2 }, Vector3Zero(), RED, shader);
-    lights[2] = CreateLight(LIGHT_POINT, (Vector3){ -2, 1, 2 }, Vector3Zero(), GREEN, shader);
-    lights[3] = CreateLight(LIGHT_POINT, (Vector3){ 2, 1, -2 }, Vector3Zero(), BLUE, shader);
+    lights[0] = CreateLight(LIGHT_POINT, (Vector3){ -2, 1, -2 }, Vector3Zero(), YELLOW, light_shader);
+    lights[1] = CreateLight(LIGHT_POINT, (Vector3){ 2, 1, 2 }, Vector3Zero(), RED, light_shader);
+    lights[2] = CreateLight(LIGHT_POINT, (Vector3){ -2, 1, 2 }, Vector3Zero(), GREEN, light_shader);
+    lights[3] = CreateLight(LIGHT_POINT, (Vector3){ 2, 1, -2 }, Vector3Zero(), BLUE, light_shader);
 
     //Vector3 cubePosition = { 0.0f, 1.0f, 0.0f };  // {x, y ,z}
 
@@ -175,7 +170,8 @@ int main()
             default: break;
         }
 
-        UpdateCamera(&camera);
+        player->update_cam();
+        //UpdateCamera(&camera);
         //----------------------------------------------------------------------------------
 
         // Draw
@@ -205,15 +201,17 @@ int main()
                     //BeginTextureMode(target);
 
                         ClearBackground(SKYBLUE);
-                        BeginMode3D(camera);
+                        player->begin_mode3d();
+                        //BeginMode3D(camera);
                         
                         // Stuff to do in 3d mode
                         //-----------------------------------------------------------------------------
                             DrawModel(model, {0.0f, 0.0f, 0.0f}, 1.0f, WHITE);
                             DrawModel(cube, {0.0f, 1.0f, 0.0f}, 1.0f, WHITE);
                             //DrawPlane((Vector3){ 0, 0, 0 }, (Vector2){ 100, 100 }, GREEN);
-                            player->set_player_posX( camera.position.x );
-                            player->set_player_posZ( camera.position.z );
+                            // player->set_player_posX( camera.position.x );
+                            // player->set_player_posZ( camera.position.z );
+                            player->update_player();
                             world->draw_static_objects();
                             //DrawModel(church, {10.0f, 0.0f, 5.0f}, 1.1f, WHITE);
                             //DrawCubeTexture(cubicmap, cubePosition, 2.0f, 2.0f, 2.0f, WHITE);
@@ -250,7 +248,7 @@ int main()
     //--------------------------------------------------------------------------------------
     delete player;
     delete world;
-    UnloadShader(shader);
+    UnloadShader(light_shader);
     CloseWindow();        // Close window and OpenGL context
     //--------------------------------------------------------------------------------------
 

@@ -1,7 +1,17 @@
 #include "include/Player.h"
 
 
-Player::Player() {};
+Player::Player()
+{
+    pm_camera.position = (Vector3){ 2.0f, 2.0f, 2.0f };
+    pm_camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
+    pm_camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
+    pm_camera.fovy = 30.0f;
+    pm_camera.projection = CAMERA_PERSPECTIVE;
+
+    SetCameraMode(pm_camera, CAMERA_FIRST_PERSON);
+};
+
 Player::~Player() {};
 
 void Player::set_player_posX(float x) { pm_position.x = x; }
@@ -16,7 +26,11 @@ float Player::get_player_posX() { return pm_position.x; }
 float Player::get_player_posY() { return pm_position.y; }
 float Player::get_player_posZ() { return pm_position.z; }
 
+void Player::begin_mode3d() { BeginMode3D(pm_camera); }
+void Player::update_cam() { UpdateCamera(&pm_camera); }
+
 void Player::update_player()
 {
-    
+    pm_position.x = pm_camera.position.x;
+    pm_position.z = pm_camera.position.z; 
 }

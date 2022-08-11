@@ -6,9 +6,9 @@
 class Player
 {
 private:
-    Camera pm_camera; 
     Vector3 pm_position;
     int pm_health_points;
+    Camera pm_camera = { 0 }; 
 public:
     Player();
     ~Player();
@@ -25,6 +25,8 @@ public:
     float get_player_posZ();
     Vector3 get_player_pos();
 
+    void update_cam();
+    void begin_mode3d();
     void update_player();
 
 };

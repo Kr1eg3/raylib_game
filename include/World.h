@@ -23,4 +23,6 @@ public:
     void push_static_object(Static_object);
     void apply_textures_for_static_objects();
     void draw_static_objects();
+
+    Static_object get_static_object(int);
 };

@@ -3,6 +3,7 @@
 
 World::World() {};
 
+Static_object World::get_static_object(int num) { return static_objects.at(num); }
 
 void World::push_static_object(Static_object obj) { static_objects.push_back(obj); }
 
